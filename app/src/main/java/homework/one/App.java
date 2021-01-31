@@ -3,12 +3,127 @@
  */
 package homework.one;
 
-public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
+
+import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Pos;
+import javafx.scene.*;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.text.Text;
+import javafx.stage.*;
+import java.util.*;
+
+import static javafx.collections.FXCollections.observableArrayList;
+
+public class App extends Application {
+    private Vector<Course> catalog= new Vector<Course>();
+    private int courseNumber;
+    private int numberCredits;
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        Application.launch(args);
     }
+
+    @Override
+    public void start(Stage stage) throws Exception{
+        //Labels
+        Text cNumber= new Text("Course #:");
+        Text cNam= new Text("Course Name:");
+        Text dept= new Text("Department:");
+        Text cred= new Text("Credit Hours: ");
+
+        //Input Fields
+        TextField cNum= new TextField();
+        TextField cName= new TextField();
+        TextField credits= new TextField();
+
+
+        //Combo Box set up
+        ComboBox<String> depart= new ComboBox<String>();
+        depart.getItems().add("Computer Science");
+        depart.getItems().add("Chemistry");
+        depart.getItems().add("Physics");
+        depart.getItems().add("Mathematics");
+        depart.getItems().add("Botany");
+        depart.getItems().add("Zoology");
+
+        //ListView for Displaying Courses
+        ListView<String >  catalogView= new ListView<String>();
+
+        //Buttons
+        //enters in the course
+        Button enterC= new Button("Enter");
+        enterC.setOnAction((new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                    catalog.add(new Course((String) depart.getValue(), cName.getText(), Integer.parseInt(cNum.getText()), Integer.parseInt(credits.getText())));
+                } catch (NumberFormatException ex){
+                    System.err.println("One of the Number fields you entered a letter");
+                }
+            }
+        }));
+        //displays all the courses in the list view
+        Button displayCA= new Button("Display All Courses");
+        displayCA.setOnAction((new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                ObservableList<String> cata = FXCollections.observableArrayList();
+                for (int i=0; i<catalog.size(); i++) {
+                    cata.add(catalog.get(i).toString());
+                }
+                if (!cata.isEmpty()){
+                    catalogView.setItems(cata);
+                }else {
+                    cata.add("No Courses Found");
+                    catalogView.setItems(cata);
+                }
+            }
+        }));
+        //displays all the courses with the
+        Button displayCD= new Button("Display Dept Courses");
+        displayCD.setOnAction((new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                ObservableList<String> cata= FXCollections.observableArrayList();
+                for (int i=0; i<catalog.size(); i++){
+                    if (catalog.get(i).getDepartment() == depart.getValue()){
+                        cata.add(catalog.get(i).toString());
+                    }
+                }
+                if (!cata.isEmpty()){
+                    catalogView.setItems(cata);
+                }else {
+                    cata.add("No Courses Found In that Department");
+                    catalogView.setItems(cata);
+                }
+            }
+        }));
+
+        //Setting up the stage
+        //used for positioning
+        VBox one= new VBox(dept, depart, catalogView);
+        VBox two= new VBox(cNumber, cNum, enterC);
+        VBox three= new VBox(cNam, cName, displayCA);
+        VBox four= new VBox(cred, credits, displayCD);
+        HBox last= new HBox(one, two, three, four);
+        //sets spacing for positioning
+        one.setSpacing(10);
+        two.setSpacing(10);
+        three.setSpacing(10);
+        four.setSpacing(10);
+        last.setSpacing(20);
+
+        //Puts it all together and shows it in the created window
+        Scene scene= new Scene(last, 800, 550);
+        stage.setScene(scene);
+        stage.show();
+    }
+
 }
